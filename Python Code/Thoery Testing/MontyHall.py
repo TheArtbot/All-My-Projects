@@ -3,7 +3,12 @@ import math
 import pandas
 
 def MontyHaul(n,a,switchState):
+    # i was orginally planing to make it so you could increase the number of "sports cars" behind the door
+    # but i decided it's doesn't matter now that i understood the formula for calculating your chances of winning.
+    # Pr(win) = Pr(that you were wrong before) * Pr(that you're correct now) = ((n-k)/n) * (k/(n-p-1))
+    # where: n -> #of doors, k -> #of "sports cars", p -> #number of doors monty throws out.
     
+    # the game when you don't "switch" but just "pick again"
     def game(a):
         doors = [0 for _ in range(a)]
         for i in range(1):
@@ -24,7 +29,8 @@ def MontyHaul(n,a,switchState):
         win = (doors[players_choice] != 0)
         
         return {"Win":win,"Switch":switch}
-    
+        
+    # the game when you do "switch"
     def game2(a):
         doors = [0 for _ in range(a)]
         for i in range(1):
@@ -51,7 +57,8 @@ def MontyHaul(n,a,switchState):
             
         win = (doors[final_player_choice] != 0)
         return {"Win":win,"Switch":switch}
-        
+
+    # game when monty doesn't remove a door
     def game3(a):
         doors = [0 for _ in range(a)]
         for i in range(1):
