@@ -5,8 +5,21 @@ import random
 from time import sleep
 from tracemalloc import start
 
+# This is a game where you fight agaisnt an AI trying to get a cetain combination of water in a set of jugs
+# Based on the classic water jug problem where you are you need to fill the jugs in a certain way but you can only use
+# "filling th jugs completely", "emptying the jugs completely" or "fill one jug from another."
 
-def equalString(str1, str2):
+# i tried to do some fancy math for figuring out who the set random but fair end points for you and the bot
+# in th end the game kinda becomes unfair for the bot (favoring you) since the bot can't do all of it's optimal moves but it doesn't really know that.
+
+# improvements:
+# >> Better AlphaBeta pruning
+# >> Add the option to turn of players being able to back track
+# >> add a mode of bot v bot or player v player.
+# >> Make better shuffle system.
+# >> Set custum setting, i don't think i implemented this yet.
+
+def equalString(str1, str2): # special way of test if the strings are equal.
     #print("Str1:",str1,"\nStr2:",str2,"\n----------------")
     if not(len(str1) == len(str2)): return False
     for i,s in enumerate(str1): 
@@ -15,11 +28,11 @@ def equalString(str1, str2):
         if not(s == str2[i] or s == str2[i].upper() or s == str2[i].lower()): return False
     return True
 
-def stringSubtract(str1 = "",str2 = "", allCase = False):
+def stringSubtract(str1 = "",str2 = "", allCase = False): # special way of subtracting one string from the other
     for s in str2:
         checkS = str1
         str1 = str1.replace(s,'',1)
-        if not(allCase):
+        if not(allCase): # allCase just means if we should count capitals and commons as well or should it just be match cases
             continue
         if checkS == str1:
             str1 = str1.replace(s.lower(),'',1)
@@ -27,7 +40,7 @@ def stringSubtract(str1 = "",str2 = "", allCase = False):
             str1 = str1.replace(s.upper(),'',1)
     return str1
 
-def strFind(source, search, Case = False, Order = False):
+def strFind(source, search, Case = False, Order = False): # finds a string inside another, Including in order(or not) and with matching Case (or not)
     if len(search) > len(source):
         return False
     
@@ -85,7 +98,7 @@ def listSubset(sub, sup, whole = False):
         start += 1
     return False
    
-def clear():
+def clear(): # these where for making the app more presentable, but i don't think i used them in the end.
     '''fucntion from: https://www.geeksforgeeks.org/clear-screen-python/'''
     # for windows
     if os.name == 'nt':
@@ -94,7 +107,7 @@ def clear():
     else:
         os.system('clear') 
  
-def clearPrevLine(count = 1):
+def clearPrevLine(count = 1): # same as before.
     '''function from: https://itnext.io/overwrite-previously-printed-lines-4218a9563527'''
     LINE_UP = '\033[1A'
     LINE_CLEAR = '\x1b[2K'
@@ -103,7 +116,7 @@ def clearPrevLine(count = 1):
         print(LINE_UP, end=LINE_CLEAR)
         #print(SCROLL_UP, end = LINE_UP)
 
-def wasting_water_UI(sett_vars):
+def wasting_water_UI(sett_vars): # Main Menu
     clear()
     print("\033[1;4mWelcome to Wasting Water!\033[0m")
     print(">> To play type play()")
@@ -131,7 +144,7 @@ def wasting_water_UI(sett_vars):
             
         print(">> Sorry I don't not recognise: ", userIn)
   
-def rules(sett_vars):
+def rules(sett_vars): # Game rules
     clear()
     print("\033[4mRULES:\033[0m")
     print(">> The rules are simple.")
@@ -152,12 +165,12 @@ def rules(sett_vars):
     
     wasting_water_UI(sett_vars)
 
-def setting(sett_vars):
+def setting(sett_vars): # settings menu to view and edit settings
     clear()
     print("\033[4mSETTINGS:\033[0m")
     while True:
         breakpoint()
-        print(">> Difficulty: ", sett_vars["diffLv"])
+        print(">> Difficulty: ", sett_vars["diffLv"]) # dificultiy is  varibale used to decide all the other setting variables.
         print(">> Here are the settings for your current difficulty level : ")
         print("  >> Your Goal: ", sett_vars["pTarget"])
         print("  >> Bot's Goal: ", sett_vars["bTarget"])
@@ -214,22 +227,25 @@ def realizeDifficulty(level):
     
     # then to decide how much distance there can be between the start and the goal.
     # both player and the bot have to have the same distance between start and goal.
+    # i assume this makes for fair gameplay (this isn't a proven theory)
     dis_from_start = 7 * math.ceil(level/2)
     
-    # then how far from the max filled jugs, this is to ensure the winnablity of an arrangment.
+    # then how far from the max filled jugs, this is to ensure the "winnablity" of an arrangment.
     # same as before, they must be the same distance etc...
     dis_from_full = math.ceil(level/2) 
     
     # this represent the minimum amount of state the search needs to pass before i can start the selection process
     min_path_len = math.ceil(level/2) + 7
     
-    # we need to set the starting jugs and jug capacities.
+    # Now, we need to set the starting jugs and jug capacities.
     # to optimise the variance of player and bot goals
-    # there need to be as much overlap between the states that fir the start_dis and the states that fit the
+    # there need to be as much overlap between the states that fit the start_dis and the states that fit the
     # full_dis. 
 
+    # since we want points that are a given disntance away from the start, then we want we can visualize them and points in a circle/shpere/how ever many dimession you want.
+    
     # So working out the facts:
-    #   the minimum case for full_jugs "position" is a "point" start_rad + full_rad away from start.
+    #   the minimum case for full_jugs "position" is a "point" start_radius + full_radius away from start. (in case start isn't (0,0,0,...,0)
     #   the maximum case is a "point" where: full_rad = start_rad + dis_between.
     # so i need to find the distance between the two points and then place full_jug along that line.
     # thus rewrite the eqn in terms of dis_between.
@@ -239,7 +255,7 @@ def realizeDifficulty(level):
     start_jugs = [0 for n in range(jugAmount)]
     start_full_dis = (random.randint(abs(dis_from_full - dis_from_start),(dis_from_start + dis_from_full)))**2 
 
-    # I wil make a free vector with the required magnitude and add it to full_jug.
+    # I will make a free vector with the required magnitude and add it to full_jug.
     free_vec = [1 for n in range(jugAmount)]
     for index, comp in enumerate(free_vec):
         if index == len(free_vec) - 1: free_vec[index] = start_full_dis; continue
@@ -321,7 +337,7 @@ def realizeDifficulty(level):
     
     return {"pTarget": player_goal, "bTarget": bot_goal, "capacity": full_jugs, "start": start_jugs, "searchDepth":s_depth}
           
-def settCustomise():
+def settCustomise(): # i don't think i implemented this yet...
     print("CUSTOMISE SETTINGS: ")
     print(">> Here are the current settings: ")
     print("  >> Your Goal: ", pTarget)
