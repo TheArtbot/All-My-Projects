@@ -49,10 +49,10 @@ print(repeat(10,4))
 # alright now it working!
 # this will print 4^10, i.e: the fucntione return b^a
 # you get it?
-print(repeatSquares(5,19))
+print(repeatSquares(10,4))
 
 # now let's test it
-print(repeatSquares2(19,5))
+print(repeatSquares2(10,4))
 # since repeatedSquares and repeatedSquares2 gave the same answer we can assume they work the same
 # side note they currently take (a,b) and return b^a, from now on i will code it so that it returns a^b 
 # instead, It seems more intuitive to me 
